@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>చందమామ · బస్ స్టాండ్ బుక్ స్టాల్</title>
 <meta name="description" content="Chandamama magazine archive, read like the bus journeys of childhood.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+<meta name="theme-color" content="#17131f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="చందమామ">
 <style>
   :root {
     --tel: "Kohinoor Telugu", "Telugu MN", "Noto Sans Telugu", "Gautami", sans-serif;
@@ -107,6 +114,12 @@
   .polaroid img { width:100%; aspect-ratio:1.35; object-fit:cover; display:block; }
   .polaroid p { font-family:var(--tel); font-size:12px; color:#6b5638; text-align:center; padding-top:8px; }
   #credit { font-size:11.5px; color:rgba(255,240,215,.55); text-align:center; max-width:420px; line-height:1.7; }
+  #a2hs { margin:26px auto 0; max-width:430px; text-align:center; font-family:var(--tel);
+    font-size:13px; color:#ffe9ad; background:rgba(20,16,30,.55);
+    border:1px dashed rgba(255,233,173,.35); border-radius:12px; padding:12px 18px; line-height:1.9; }
+  #a2hs small { display:block; font-family:var(--eng); font-size:11px; color:rgba(255,240,215,.6); }
+  @media (display-mode: standalone) { #a2hs { display:none; } }
+  #wrap { padding-top: calc(40px + env(safe-area-inset-top, 0px)); }
 
   /* ============ TICKET MODAL ============ */
   #tmodal { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center;
@@ -225,6 +238,11 @@
       <a href="https://github.com/44Tests/chandamama/issues" style="color:#ffd98f;">say the word</a>
       and it comes down immediately.
     </div>
+  </div>
+
+  <div id="a2hs">
+    📲 ఫోన్‌లో పూర్తి తెరపై చదవాలంటే — యాప్‌లా జోడించండి!<br>
+    <small>iPhone: Safari Share &#x2B06;&#xFE0E; → "Add to Home Screen" &nbsp;·&nbsp; Android: Chrome ⋮ → "Add to Home screen"</small>
   </div>
 </div>
 
