@@ -5,7 +5,33 @@ bought at a bus-stand book stall, opened on your lap as the bus rolls toward
 grandma's village. Palmyra trees and electric poles pass the window, a roadside
 milestone counts down one kilometre per page, and dusk turns to night as you read.
 
+Live at [chandamama.co](https://chandamama.co).
+
 Pure static site — no framework, no build step. Deploys anywhere; built for Vercel.
+
+## An honest note about this project
+
+I grew up in what is now Telangana, when it was still part of undivided Andhra
+Pradesh. My clearest childhood memories are of bus journeys to my grandparents'
+village during Dasara, Sankranthi, and the summer holidays — and at the bus stand,
+I would always buy two things: a packet of popcorn and the latest Telugu
+*Chandamama*. This site exists to keep that feeling alive. Nothing more.
+
+So, plainly:
+
+- **I do not own Chandamama.** Not the name, not the stories, not the art, not
+  the scans. I am just someone who loved reading it as a child.
+- **This is completely free.** No ads, no payments, no accounts, no tracking.
+  It costs you nothing and it earns me nothing.
+- **I claim no rights over anything here.** The magazine pages belong to whoever
+  rightfully holds them. The only thing I made is the reading experience around
+  them — the bus, the ticket, the milestone.
+- **If you hold rights to Chandamama and want this taken down, I will take it
+  down immediately, no argument.** Please open an issue on this repository and
+  I will remove the content as soon as I see it.
+
+If you are here because you also remember reading Chandamama on a bus — welcome.
+This is for you too.
 
 ## Structure
 
@@ -54,8 +80,3 @@ Import the GitHub repo at vercel.com → framework preset **Other**, no build
 command, output directory = repo root. `vercel.json` already sets immutable
 caching for `/editions/*`.
 
-## A note on the scans
-
-These are scans of a magazine with a complicated rights history. This project
-exists as personal memory-keeping; if you republish it, that judgment — and any
-takedown request that follows — is yours to own.
