@@ -26,17 +26,19 @@ ED="$ROOT/editions/$ID"
 if [[ -e "$ED" ]]; then echo "edition already exists: $ED (delete it to re-ingest)" >&2; exit 1; fi
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$ED/pages"
+mkdir -p "$ED/pages" "$ED/thumbs"
 
 echo "→ rendering $PDF ..."
 pdftoppm -png -r 55 "$PDF" "$TMP/p"
 
-echo "→ encoding WebP ..."
+echo "→ encoding WebP pages + thumbs ..."
 n=0
 for png in "$TMP"/p-*.png; do
   n=$((n+1))
   out=$(printf "%s/pages/page-%03d.webp" "$ED" "$n")
+  thumb=$(printf "%s/thumbs/page-%03d.webp" "$ED" "$n")
   cwebp -quiet -q 78 "$png" -o "$out"
+  cwebp -quiet -q 70 -resize 220 0 "$png" -o "$thumb"
 done
 if [[ $n -eq 0 ]]; then echo "no pages rendered" >&2; exit 1; fi
 

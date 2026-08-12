@@ -349,10 +349,9 @@
       setTimeout(function(){ location.replace('./'); }, 1800);
     });
 
-  function pageFile(n){
-    var s = n < 10 ? '00'+n : (n < 100 ? '0'+n : ''+n);
-    return base + '/pages/page-' + s + '.webp';
-  }
+  function pad3(n){ return n < 10 ? '00'+n : (n < 100 ? '0'+n : ''+n); }
+  function pageFile(n){ return base + '/pages/page-' + pad3(n) + '.webp'; }
+  function thumbFile(n){ return base + '/thumbs/page-' + pad3(n) + '.webp'; }
 
   /* ---------- build sheets ---------- */
   function buildSheets(){
@@ -380,22 +379,42 @@
     img.alt = 'పేజీ ' + n;
     img.draggable = false;
     img.decoding = 'async';
+    img.onload = function(){
+      var l = face.querySelector('.loading');
+      if (l) l.remove();
+    };
     face.insertBefore(img, face.querySelector('.shade'));
   }
-  function ensureWindowLoaded(){
-    var from = Math.max(0, cs-3), to = Math.min(SHEETS-1, cs+5);
-    for (var i=from; i<=to; i++){
-      loadFace(sheets[i],'front', +sheets[i].dataset.front);
-      loadFace(sheets[i],'back',  +sheets[i].dataset.back);
+  function unloadFace(sheet, cls){
+    var face = sheet.querySelector('.face.'+cls);
+    if (!face.dataset.done) return;
+    delete face.dataset.done;
+    var img = face.querySelector('img');
+    if (img) img.remove();
+    if (!face.querySelector('.loading')){
+      var ld = document.createElement('div');
+      ld.className = 'loading'; ld.textContent = 'చందమామ…';
+      face.insertBefore(ld, face.firstChild);
     }
   }
-  var preloadIdx = 0;
-  function trickle(){
-    if (preloadIdx >= SHEETS) return;
-    loadFace(sheets[preloadIdx],'front', +sheets[preloadIdx].dataset.front);
-    loadFace(sheets[preloadIdx],'back',  +sheets[preloadIdx].dataset.back);
-    preloadIdx++;
-    setTimeout(trickle, 350);
+  /* iOS kills the page if too many decoded images / GPU layers pile up:
+     keep a small window of sheets loaded, unload the rest, and take
+     far-away sheets out of the compositor entirely. */
+  function ensureWindowLoaded(){
+    var from = Math.max(0, cs-2), to = Math.min(SHEETS-1, cs+4);
+    var vFrom = Math.max(0, from-2), vTo = Math.min(SHEETS-1, to+2);
+    for (var i=0; i<SHEETS; i++){
+      var s = sheets[i];
+      if (i >= from && i <= to){
+        s.style.display = '';
+        loadFace(s,'front', +s.dataset.front);
+        loadFace(s,'back',  +s.dataset.back);
+      } else {
+        s.style.display = (i < vFrom || i > vTo) ? 'none' : '';
+        unloadFace(s,'front');
+        unloadFace(s,'back');
+      }
+    }
   }
 
   /* ---------- layout ---------- */
@@ -706,7 +725,17 @@
     for (var p=1;p<=TOTAL;p++){
       var th = document.createElement('div');
       th.className = 'th'; th.dataset.p = p;
-      th.innerHTML = '<img loading="lazy" src="'+pageFile(p)+'" alt=""><span>'+p+'</span>';
+      var im = document.createElement('img');
+      im.loading = 'lazy'; im.decoding = 'async'; im.alt = '';
+      im.src = thumbFile(p);
+      im.onerror = function(){          /* editions ingested before thumbs existed */
+        this.onerror = null;
+        this.src = pageFile(+this.parentNode.dataset.p);
+      };
+      th.appendChild(im);
+      var sp = document.createElement('span');
+      sp.textContent = p;
+      th.appendChild(sp);
       th.addEventListener('click', function(){
         goToPage(+this.dataset.p);
         thumbs.classList.remove('open');
@@ -939,7 +968,6 @@
     } else {
       paint(true);
     }
-    setTimeout(trickle, 4000);
     window.addEventListener('resize', function(){ layout(); paint(true); });
   }
 })();
