@@ -208,17 +208,25 @@
     transition: transform .5s cubic-bezier(.2,.9,.3,1.2); box-shadow:0 8px 24px rgba(0,0,0,.5); }
   #toast.show { transform:translateX(-50%) translateY(0); }
 
-  @media (max-width: 640px) {
-    #milestone { width:96px; top:14px; left:14px; }
-    #milestone .place { font-size:11px; } #milestone .km { font-size:17px; }
-    #bar { gap:6px; } #bar button, #bar a.btn { padding:6px 8px; font-size:11px; }
-    #pageInfo { min-width:56px; font-size:12px; }
+  /* narrow mode: shade the sliver of the neighbouring page at the screen edges */
+  body.narrow #stage::before, body.narrow #stage::after {
+    content:""; position:absolute; top:0; bottom:0;
+    width: calc((100vw - var(--pw)) / 2 + 2px);
+    z-index:26; pointer-events:none;
   }
-  @media (max-width: 460px) {
-    #bar { gap:4px; } #bar button, #bar a.btn { padding:5px 6px; font-size:10.5px; }
-    #btnFull { display:none; }
-    #btnPrev, #btnNext { display:none; } /* swipe + edge taps cover navigation */
-    #pageInfo { min-width:48px; }
+  body.narrow #stage::before { left:0;
+    background: linear-gradient(to right, rgba(9,7,20,.88) 30%, rgba(9,7,20,0)); }
+  body.narrow #stage::after  { right:0;
+    background: linear-gradient(to left, rgba(9,7,20,.88) 30%, rgba(9,7,20,0)); }
+
+  @media (max-width: 640px) {
+    #milestone { width:86px; top:10px; left:10px; }
+    #milestone .place { font-size:10.5px; } #milestone .km { font-size:16px; }
+    #bar { gap:7px; }
+    #bar .txt { display:none; }              /* icon-only pills on phones */
+    #bar button, #bar a.btn { padding:7px 12px; font-size:16px; line-height:1; }
+    #bar #btnFull { display:none; }          /* iPhones don't support it anyway */
+    #pageInfo { min-width:58px; font-size:13px; }
   }
 </style>
 </head>
@@ -263,14 +271,14 @@
 
 <div id="bar">
   <div id="progressTrack"><div id="progressFill"></div></div>
-  <a class="btn" id="btnStall" href="./" title="బుక్ స్టాల్‌కు తిరిగి">🏪 స్టాల్</a>
-  <button id="btnPrev" title="←">‹ వెనుకకు</button>
+  <a class="btn" id="btnStall" href="./" title="బుక్ స్టాల్‌కు తిరిగి"><span class="ico">🏪</span><span class="txt"> స్టాల్</span></a>
+  <button id="btnPrev" title="←"><span class="ico">‹</span><span class="txt"> వెనుకకు</span></button>
   <div id="pageInfo">…</div>
-  <button id="btnNext" title="→">ముందుకు ›</button>
-  <button id="btnZoom" title="పెద్దది చేయండి">🔍</button>
-  <button id="btnThumbs" title="అన్ని పేజీలు">☰ పేజీలు</button>
-  <button id="btnSound" title="శబ్దం">🔊 ప్రయాణం</button>
-  <button id="btnFull" title="పూర్తి తెర">⛶</button>
+  <button id="btnNext" title="→"><span class="txt">ముందుకు </span><span class="ico">›</span></button>
+  <button id="btnZoom" title="పెద్దది చేయండి"><span class="ico">🔍</span></button>
+  <button id="btnThumbs" title="అన్ని పేజీలు"><span class="ico">☰</span><span class="txt"> పేజీలు</span></button>
+  <button id="btnSound" title="శబ్దం"><span class="ico">🔊</span><span class="txt"> ప్రయాణం</span></button>
+  <button id="btnFull" title="పూర్తి తెర"><span class="ico">⛶</span></button>
 </div>
 
 <div id="thumbs">
@@ -397,6 +405,7 @@
     }
     document.documentElement.style.setProperty('--pw', pw+'px');
     document.documentElement.style.setProperty('--ph', ph+'px');
+    document.body.classList.toggle('narrow', narrow);
     if (narrow){
       bookShift.style.width = pw+'px';
       applyShift(false);
@@ -897,7 +906,7 @@
   var btnSound = document.getElementById('btnSound');
   btnSound.addEventListener('click', function(){
     soundOn = !soundOn;
-    btnSound.textContent = (soundOn ? '🔊' : '🔇') + ' ప్రయాణం';
+    btnSound.querySelector('.ico').textContent = soundOn ? '🔊' : '🔇';
     document.body.classList.toggle('paused', !soundOn);
     if (soundOn){ initAudio(); if (AC && AC.state==='suspended') AC.resume(); rumbleTo(0.12); }
     else rumbleTo(0);
