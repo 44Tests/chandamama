@@ -12,6 +12,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="చందమామ">
+<meta property="og:title" content="చందమామ · The Bus-Stand Book Stall">
+<meta property="og:description" content="Read Chandamama the way we did as children — bought at a bus stand, opened on your lap as the bus rolls toward grandma's village.">
+<meta property="og:image" content="https://www.chandamama.co/logo.png">
+<meta property="og:url" content="https://www.chandamama.co/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root {
     --tel: "Kohinoor Telugu", "Telugu MN", "Noto Sans Telugu", "Gautami", sans-serif;
@@ -32,14 +38,17 @@
   #moon { position:fixed; top:5%; right:7%; width:min(14vmin,110px); z-index:0;
     filter: drop-shadow(0 0 30px rgba(255,244,200,.6)); animation: moonFloat 7s ease-in-out infinite; }
   @keyframes moonFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+  #moon { display:none; }   /* the logo brings its own moon */
   #treeline { position:fixed; left:0; right:0; bottom:0; height:20vh; z-index:0;
     background-repeat:repeat-x; background-size:auto 100%; opacity:.9; pointer-events:none; }
 
   #wrap { position:relative; z-index:1; max-width:1060px; margin:0 auto; padding: 40px 20px 80px; }
 
   header { text-align:center; margin-bottom:30px; }
-  header h1 { font-family:var(--tel); font-size:clamp(44px, 8vw, 76px); font-weight:800;
-    color:#ffe9ad; text-shadow: 0 3px 0 #8a4d18, 0 8px 30px rgba(0,0,0,.45); letter-spacing:2px; }
+  header h1 { margin:0; }
+  #logoImg { display:block; margin:0 auto -6px; width:min(560px, 92vw);
+    pointer-events:none;
+    filter: drop-shadow(0 0 26px rgba(120,140,255,.35)); }
   header .sub { font-family:var(--tel); font-size:16px; color:#ffd98f; letter-spacing:1px; margin-top:8px; }
   header .subEn { font-size:12.5px; font-style:italic; color:rgba(255,240,215,.7); margin-top:6px; }
 
@@ -204,7 +213,7 @@
 
 <div id="wrap">
   <header>
-    <h1>చందమామ</h1>
+    <h1><img id="logoImg" src="assets/logo-header.webp" alt="చందమామ"></h1>
     <div class="sub">బస్ స్టాండ్ బుక్ స్టాల్ · ఒక సంచిక ఎంచుకోండి</div>
     <div class="subEn">Pick an issue at the stall. The bus is waiting.</div>
   </header>
