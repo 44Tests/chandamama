@@ -2,7 +2,7 @@
 <html lang="te">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>చందమామ · The Bus Journey</title>
 <style>
   :root {
@@ -177,6 +177,30 @@
   #thumbGrid .th span { position:absolute; bottom:4px; right:6px; background:rgba(0,0,0,.65); color:#ffe9ad;
     font-size:11px; padding:1px 6px; border-radius:8px; font-family:var(--tel); }
 
+  /* ============ ZOOM ============ */
+  #zoomer { position:fixed; inset:0; z-index:95; background:rgba(6,5,12,.97); display:none;
+    overflow:hidden; touch-action:none; }
+  #zoomer.open { display:block; }
+  #zoomImg { position:absolute; left:0; top:0; transform-origin:0 0; background:#f6efdd;
+    user-select:none; -webkit-user-drag:none; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+  #zoomBar { position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; align-items:center; z-index:2;
+    background:rgba(20,16,30,.88); border:1px solid rgba(255,233,173,.25);
+    border-radius:26px; padding:7px 12px; }
+  #zoomBar button { background:none; border:none; color:#ffe9ad; font-size:20px; cursor:pointer; padding:2px 10px; }
+  #zoomInfo { color:#e8dcc0; font-family:var(--tel); font-size:13px; min-width:64px; text-align:center; }
+  #zoomHint { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:2;
+    color:rgba(255,233,173,.75); font-family:var(--tel); font-size:12.5px;
+    background:rgba(20,16,30,.7); padding:6px 16px; border-radius:20px; pointer-events:none;
+    transition: opacity 1s ease; }
+  #zoomHint.faded { opacity:0; }
+
+  /* snappier, lighter flip on phones */
+  @media (max-width: 640px) {
+    .sheet { transition-duration: 640ms; }
+    .face { box-shadow:none; }
+  }
+
   /* toast */
   #toast { position:fixed; top:26px; left:50%; transform:translateX(-50%) translateY(-80px); z-index:90;
     background:rgba(20,16,30,.9); color:#ffe9ad; font-family:var(--tel); font-size:15px;
@@ -243,6 +267,7 @@
   <button id="btnPrev" title="←">‹ వెనుకకు</button>
   <div id="pageInfo">…</div>
   <button id="btnNext" title="→">ముందుకు ›</button>
+  <button id="btnZoom" title="పెద్దది చేయండి">🔍</button>
   <button id="btnThumbs" title="అన్ని పేజీలు">☰ పేజీలు</button>
   <button id="btnSound" title="శబ్దం">🔊 ప్రయాణం</button>
   <button id="btnFull" title="పూర్తి తెర">⛶</button>
@@ -254,6 +279,17 @@
     <button id="btnCloseThumbs">✕</button>
   </header>
   <div id="thumbGrid"></div>
+</div>
+
+<div id="zoomer">
+  <img id="zoomImg" alt="" draggable="false">
+  <div id="zoomHint">పించ్ చేసి పెద్దది చేయండి · రెండుసార్లు నొక్కండి</div>
+  <div id="zoomBar">
+    <button id="zoomPrevBtn" title="వెనుక పేజీ">‹</button>
+    <span id="zoomInfo"></span>
+    <button id="zoomNextBtn" title="తరువాత పేజీ">›</button>
+    <button id="zoomCloseBtn" title="మూసివేయి">✕</button>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -326,6 +362,7 @@
     img.src = pageFile(n);
     img.alt = 'పేజీ ' + n;
     img.draggable = false;
+    img.decoding = 'async';
     face.insertBefore(img, face.querySelector('.shade'));
   }
   function ensureWindowLoaded(){
@@ -394,8 +431,13 @@
   }
   function raiseDuringTurn(i){
     sheets[i].style.zIndex = 400;
+    sheets[i].style.willChange = 'transform';
     (function(sh){
-      var done = function(){ sh.removeEventListener('transitionend', done); paint(false); };
+      var done = function(){
+        sh.removeEventListener('transitionend', done);
+        sh.style.willChange = '';
+        paint(false);
+      };
       sh.addEventListener('transitionend', done);
       setTimeout(done, 1000);
     })(sheets[i]);
@@ -664,6 +706,134 @@
   });
   document.getElementById('btnCloseThumbs').addEventListener('click', function(){ thumbs.classList.remove('open'); });
 
+  /* ---------- zoom (pinch / double-tap / wheel) ---------- */
+  var zoomer = document.getElementById('zoomer');
+  var zoomImg = document.getElementById('zoomImg');
+  var zoomInfo = document.getElementById('zoomInfo');
+  var zoomHint = document.getElementById('zoomHint');
+  var zoomPage = 1, zs = 1, ztx = 0, zty = 0, fitW = 0, fitH = 0;
+  var zoomOpen = false;
+
+  function zoomRender(){
+    zoomImg.style.width = fitW + 'px';
+    zoomImg.style.transform = 'translate('+ztx+'px,'+zty+'px) scale('+zs+')';
+  }
+  function zoomFit(){
+    var W = window.innerWidth, H = window.innerHeight;
+    fitW = Math.min(W, H * AR); fitH = fitW / AR;
+    zs = 1; ztx = (W - fitW)/2; zty = (H - fitH)/2;
+    zoomRender();
+  }
+  function zoomClamp(){
+    var W = window.innerWidth, H = window.innerHeight;
+    var w = fitW * zs, h = fitH * zs;
+    if (w <= W) ztx = (W - w)/2; else ztx = Math.max(W - w, Math.min(0, ztx));
+    if (h <= H) zty = (H - h)/2; else zty = Math.max(H - h, Math.min(0, zty));
+  }
+  function openZoom(p){
+    zoomPage = Math.max(1, Math.min(TOTAL, p));
+    zoomImg.src = pageFile(zoomPage);
+    zoomInfo.textContent = zoomPage + ' / ' + TOTAL;
+    zoomer.classList.add('open');
+    zoomOpen = true;
+    zoomHint.classList.remove('faded');
+    setTimeout(function(){ zoomHint.classList.add('faded'); }, 2600);
+    zoomFit();
+  }
+  function closeZoom(){
+    zoomer.classList.remove('open');
+    zoomOpen = false;
+    if (edition && zoomPage !== visiblePage()) goToPage(zoomPage);
+  }
+  function zoomStep(d){
+    var p = Math.max(1, Math.min(TOTAL, zoomPage + d));
+    if (p === zoomPage) return;
+    zoomPage = p;
+    zoomImg.src = pageFile(p);
+    zoomInfo.textContent = p + ' / ' + TOTAL;
+    zoomFit();
+  }
+  document.getElementById('btnZoom').addEventListener('click', function(){ if (edition) openZoom(visiblePage()); });
+  document.getElementById('zoomCloseBtn').addEventListener('click', closeZoom);
+  document.getElementById('zoomPrevBtn').addEventListener('click', function(){ zoomStep(-1); });
+  document.getElementById('zoomNextBtn').addEventListener('click', function(){ zoomStep(1); });
+  window.addEventListener('resize', function(){ if (zoomOpen) zoomFit(); });
+
+  var zPointers = new Map();
+  var pinch0 = null;
+  zoomer.addEventListener('pointerdown', function(e){
+    if (e.target.closest && e.target.closest('#zoomBar')) return;
+    if (zoomer.setPointerCapture){ try { zoomer.setPointerCapture(e.pointerId); } catch(err){} }
+    zPointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (zPointers.size === 2){
+      var pts = Array.from(zPointers.values());
+      pinch0 = {
+        d: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y) || 1,
+        mx:(pts[0].x+pts[1].x)/2, my:(pts[0].y+pts[1].y)/2,
+        s: zs, tx: ztx, ty: zty
+      };
+    }
+  });
+  zoomer.addEventListener('pointermove', function(e){
+    var p = zPointers.get(e.pointerId);
+    if (!p) return;
+    var px = p.x, py = p.y;
+    p.x = e.clientX; p.y = e.clientY;
+    if (zPointers.size === 2 && pinch0){
+      var pts = Array.from(zPointers.values());
+      var d = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      var mx = (pts[0].x+pts[1].x)/2, my = (pts[0].y+pts[1].y)/2;
+      var ns = Math.max(1, Math.min(6, pinch0.s * (d / pinch0.d)));
+      ztx = mx - (pinch0.mx - pinch0.tx) * (ns / pinch0.s);
+      zty = my - (pinch0.my - pinch0.ty) * (ns / pinch0.s);
+      zs = ns;
+      zoomClamp(); zoomRender();
+    } else if (zPointers.size === 1){
+      ztx += e.clientX - px; zty += e.clientY - py;
+      zoomClamp(); zoomRender();
+    }
+  });
+  function zEnd(e){
+    zPointers.delete(e.pointerId);
+    if (zPointers.size < 2) pinch0 = null;
+  }
+  zoomer.addEventListener('pointerup', zEnd);
+  zoomer.addEventListener('pointercancel', zEnd);
+
+  function zoomToggleAt(x, y){
+    zoomImg.style.transition = 'transform .28s ease';
+    setTimeout(function(){ zoomImg.style.transition = ''; }, 300);
+    if (zs > 1.05){ zoomFit(); return; }
+    var ns = 2.6;
+    ztx = x - (x - ztx) * (ns / zs);
+    zty = y - (y - zty) * (ns / zs);
+    zs = ns; zoomClamp(); zoomRender();
+  }
+  var zLastTap = 0, zLastX = 0, zLastY = 0;
+  zoomer.addEventListener('pointerup', function(e){
+    if (e.target.closest && e.target.closest('#zoomBar')) return;
+    var now = Date.now();
+    if (now - zLastTap < 320 && Math.hypot(e.clientX-zLastX, e.clientY-zLastY) < 30){
+      zoomToggleAt(e.clientX, e.clientY);
+      zLastTap = 0;
+    } else { zLastTap = now; zLastX = e.clientX; zLastY = e.clientY; }
+  });
+  zoomer.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var ns = Math.max(1, Math.min(6, zs * (e.deltaY < 0 ? 1.15 : 0.87)));
+    ztx = e.clientX - (e.clientX - ztx) * (ns / zs);
+    zty = e.clientY - (e.clientY - zty) * (ns / zs);
+    zs = ns; zoomClamp(); zoomRender();
+  }, {passive:false});
+
+  /* block native page zoom — the in-reader zoom replaces it */
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+    document.addEventListener(ev, function(e){ e.preventDefault(); });
+  });
+  document.addEventListener('touchmove', function(e){
+    if (e.touches.length > 1) e.preventDefault();
+  }, {passive:false});
+
   /* ---------- controls ---------- */
   document.getElementById('zoneNext').addEventListener('click', next);
   document.getElementById('zonePrev').addEventListener('click', prev);
@@ -671,6 +841,12 @@
   document.getElementById('btnPrev').addEventListener('click', prev);
   document.addEventListener('keydown', function(e){
     if (!edition) return;
+    if (zoomOpen){
+      if (e.key==='Escape') closeZoom();
+      else if (e.key==='ArrowRight'){ e.preventDefault(); zoomStep(1); }
+      else if (e.key==='ArrowLeft'){ e.preventDefault(); zoomStep(-1); }
+      return;
+    }
     if (thumbs.classList.contains('open')){
       if (e.key==='Escape') thumbs.classList.remove('open');
       return;
@@ -680,20 +856,41 @@
     else if (e.key==='Home'){ goToPage(1); }
     else if (e.key==='End'){ goToPage(TOTAL); }
   });
-  /* swipe: pointer events when available, touch fallback otherwise */
-  var swipeX = null;
-  function swipeStart(x){ swipeX = x; }
+  /* swipe + page gestures: multi-touch aware */
+  var swipeX = null, activePts = new Map();
+  var tapT = 0, tapX = 0, tapY = 0;
   function swipeEnd(x){
-    if (swipeX === null || !edition) return;
+    if (swipeX === null || !edition || zoomOpen) return;
     var dx = x - swipeX; swipeX = null;
-    if (Math.abs(dx) > 55){ if (dx < 0) next(); else prev(); }
+    if (Math.abs(dx) > 45){ if (dx < 0) next(); else prev(); }
   }
   if (window.PointerEvent){
-    document.addEventListener('pointerdown', function(e){ swipeStart(e.clientX); }, {passive:true});
-    document.addEventListener('pointerup',   function(e){ swipeEnd(e.clientX); },   {passive:true});
-    document.addEventListener('pointercancel', function(){ swipeX = null; }, {passive:true});
+    document.addEventListener('pointerdown', function(e){
+      if (zoomOpen) return;
+      activePts.set(e.pointerId, true);
+      if (activePts.size === 2 && edition && e.target.closest && e.target.closest('#stage')){
+        swipeX = null;
+        openZoom(visiblePage());    /* two-finger touch on the page = zoom */
+        return;
+      }
+      if (activePts.size > 1){ swipeX = null; return; }
+      swipeX = e.clientX;
+    }, {passive:true});
+    document.addEventListener('pointerup', function(e){
+      activePts.delete(e.pointerId);
+      if (zoomOpen) return;
+      swipeEnd(e.clientX);
+      /* double-tap on the open page = zoom */
+      if (edition && e.target.closest && e.target.closest('#stage') && !e.target.closest('.zone')){
+        var now = Date.now();
+        if (now - tapT < 320 && Math.hypot(e.clientX-tapX, e.clientY-tapY) < 30){
+          openZoom(visiblePage()); tapT = 0;
+        } else { tapT = now; tapX = e.clientX; tapY = e.clientY; }
+      }
+    }, {passive:true});
+    document.addEventListener('pointercancel', function(e){ activePts.delete(e.pointerId); swipeX = null; }, {passive:true});
   } else {
-    document.addEventListener('touchstart', function(e){ swipeStart(e.touches[0].clientX); }, {passive:true});
+    document.addEventListener('touchstart', function(e){ if (!zoomOpen) swipeX = e.touches[0].clientX; }, {passive:true});
     document.addEventListener('touchend',   function(e){ swipeEnd(e.changedTouches[0].clientX); }, {passive:true});
   }
 
