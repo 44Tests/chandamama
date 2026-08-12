@@ -29,6 +29,10 @@
     font-family: var(--eng); color:#fff7e6; -webkit-tap-highlight-color: transparent;
     background: linear-gradient(to bottom, #1d1b47 0%, #43305f 30%, #8a4f63 55%, #d67d4b 78%, #f0a95e 100%) fixed;
   }
+  /* visit after 9pm and the stall keeps real time: deep night, last bus */
+  body.late {
+    background: linear-gradient(to bottom, #05070f 0%, #0c102e 42%, #22284e 72%, #3a3560 100%) fixed;
+  }
   button, a, .hang { touch-action: manipulation; }
 
   /* backdrop */
@@ -294,6 +298,8 @@
   }
 
   /* backdrop */
+  var hourNow = new Date().getHours();
+  if (hourNow >= 21 || hourNow < 5) document.body.classList.add('late');
   var starsBox = document.getElementById('stars');
   for (var st=0; st<50; st++){
     var d = document.createElement('div');

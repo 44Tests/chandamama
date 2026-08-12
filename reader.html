@@ -65,6 +65,23 @@
   @keyframes roll { from { background-position-x: 0; } to { background-position-x: -1200px; } }
   .paused .scroller, .paused #road { animation-play-state: paused; }
 
+  /* an oncoming bus passes on the highway now and then */
+  #oncoming { position:absolute; bottom:7%; left:0; width:46px; height:14px; opacity:0;
+    pointer-events:none; }
+  #oncoming.pass { animation: oncomingPass 3s linear forwards; }
+  @keyframes oncomingPass {
+    0%   { opacity:0; transform: translateX(104vw) scale(.4); }
+    12%  { opacity:1; }
+    86%  { opacity:1; }
+    100% { opacity:0; transform: translateX(-18vw) scale(1.3); }
+  }
+  #oncoming .hl { position:absolute; top:0; width:13px; height:13px; border-radius:50%;
+    background:#fff6d8;
+    box-shadow: 0 0 14px 6px rgba(255,240,190,.75), 0 0 46px 20px rgba(255,230,160,.3); }
+  #oncoming .hl:first-child { left:0; }
+  #oncoming .hl:last-child { right:0; }
+  .paused #oncoming { display:none; }
+
   #frame { position:absolute; inset:0; pointer-events:none;
     box-shadow: inset 0 0 0 10px #17131f, inset 0 0 0 13px #2c2438, inset 0 0 120px rgba(0,0,0,.65);
   }
@@ -188,10 +205,12 @@
 
   /* ============ ZOOM ============ */
   #zoomer { position:fixed; inset:0; z-index:95; background:rgba(6,5,12,.97); display:none;
-    overflow:hidden; touch-action:none; }
+    overflow:hidden; touch-action:none; perspective: 2200px; }
   #zoomer.open { display:block; }
-  #zoomImg { position:absolute; left:0; top:0; transform-origin:0 0; background:#f6efdd;
-    user-select:none; -webkit-user-drag:none; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+  .zpage { position:absolute; left:0; top:0; transform-origin:0 0; background:#f6efdd;
+    user-select:none; -webkit-user-drag:none; box-shadow:0 10px 40px rgba(0,0,0,.6);
+    backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+  .zpage.zflip { transition: transform .52s cubic-bezier(.35,.1,.22,1), opacity .52s ease; }
   #zoomBar { position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
     display:flex; gap:6px; align-items:center; z-index:2;
     background:rgba(20,16,30,.88); border:1px solid rgba(255,233,173,.25);
@@ -257,6 +276,7 @@
   <div id="poles"  class="scroller"></div>
   <div id="ground"></div>
   <div id="road"></div>
+  <div id="oncoming"><span class="hl"></span><span class="hl"></span></div>
   <div id="glare"></div>
   <div id="frame"></div>
 </div>
@@ -299,7 +319,7 @@
 </div>
 
 <div id="zoomer">
-  <img id="zoomImg" alt="" draggable="false">
+  <img id="zoomImg" class="zpage" alt="" draggable="false">
   <div id="zoomHint">పించ్ చేసి పెద్దది చేయండి · రెండుసార్లు నొక్కండి</div>
   <div id="zoomBar">
     <button id="zoomPrevBtn" title="వెనుక పేజీ">‹</button>
@@ -536,6 +556,7 @@
     var p = visiblePage();
     var km = TOTAL - p;
     var prog = TOTAL > 1 ? (p-1)/(TOTAL-1) : 1;
+    journeyProg = prog;
     document.documentElement.style.setProperty('--prog', prog.toFixed(3));
     if (km <= 0){
       milestone.classList.add('home');
@@ -693,6 +714,63 @@
     src.connect(bp); bp.connect(g); g.connect(masterGain);
     src.start(t);
   }
+  function sfxWhoosh(){
+    if (!AC || !soundOn) return;
+    var t = AC.currentTime;
+    var len = Math.floor(AC.sampleRate * 2.2);
+    var buf = AC.createBuffer(1, len, AC.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i=0;i<len;i++) d[i] = Math.random()*2-1;
+    var src = AC.createBufferSource(); src.buffer = buf;
+    var lp = AC.createBiquadFilter(); lp.type='lowpass'; lp.Q.value = 0.7;
+    lp.frequency.setValueAtTime(220, t);
+    lp.frequency.linearRampToValueAtTime(900, t+1.4);   /* doppler-ish rise then fall */
+    lp.frequency.linearRampToValueAtTime(160, t+2.1);
+    var g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.05, t+1.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+2.2);
+    src.connect(lp); lp.connect(g); g.connect(masterGain);
+    src.start(t);
+  }
+  function sfxChirp(){
+    if (!AC || !soundOn) return;
+    var t = AC.currentTime;
+    for (var k=0;k<3;k++){
+      var o = AC.createOscillator(); o.type='sine';
+      o.frequency.value = 4100 + Math.random()*400;
+      var g = AC.createGain();
+      var t0 = t + k*0.075;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(0.011, t0+0.012);
+      g.gain.linearRampToValueAtTime(0, t0+0.05);
+      o.connect(g); g.connect(masterGain);
+      o.start(t0); o.stop(t0+0.06);
+    }
+  }
+  /* ambient schedulers: an oncoming bus every so often; crickets near the village */
+  var oncomingEl = document.getElementById('oncoming');
+  function scheduleOncoming(){
+    setTimeout(function(){
+      if (edition && !document.hidden && !document.body.classList.contains('paused')){
+        oncomingEl.classList.remove('pass');
+        void oncomingEl.offsetWidth;
+        oncomingEl.classList.add('pass');
+        sfxWhoosh();
+      }
+      scheduleOncoming();
+    }, 16000 + Math.random()*22000);
+  }
+  scheduleOncoming();
+  var journeyProg = 0;
+  function scheduleCrickets(){
+    setTimeout(function(){
+      if (journeyProg > 0.62 && !document.hidden) sfxChirp();
+      scheduleCrickets();
+    }, 900 + Math.random()*1900);
+  }
+  scheduleCrickets();
+
   /* audio needs a user gesture: arm once */
   var audioArmed = false;
   function armAudio(){
@@ -793,13 +871,58 @@
     zoomOpen = false;
     if (edition && zoomPage !== visiblePage()) goToPage(zoomPage);
   }
+  var zAnim = false;
   function zoomStep(d){
     var p = Math.max(1, Math.min(TOTAL, zoomPage + d));
-    if (p === zoomPage) return;
-    zoomPage = p;
-    zoomImg.src = pageFile(p);
-    zoomInfo.textContent = p + ' / ' + TOTAL;
-    zoomFit();
+    if (p === zoomPage || zAnim) return;
+    zAnim = true;
+    zs = 1; zoomFit();                       /* flip happens at fit scale */
+    var atRest = 'translate('+ztx+'px,'+zty+'px)';
+    var turned = 'translate('+ztx+'px,'+zty+'px) rotateY(-150deg)';
+    var inc = document.createElement('img');
+    inc.className = 'zpage';
+    inc.alt = ''; inc.draggable = false;
+    inc.style.width = fitW + 'px';
+    inc.style.transformOrigin = 'left center';
+    inc.style.transform = (d > 0) ? atRest : turned;
+    if (d < 0) inc.style.opacity = '0.1';
+    var fallback = setTimeout(finish, 1200); /* never strand the view on a slow page */
+    inc.onload = function(){
+      clearTimeout(fallback);
+      if (d > 0) zoomer.insertBefore(inc, zoomImg);      /* new page waits beneath */
+      else zoomer.insertBefore(inc, zoomImg.nextSibling); /* new page flips in on top */
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        sfxFlip();
+        if (d > 0){
+          zoomImg.classList.add('zflip');
+          zoomImg.style.transformOrigin = 'left center';
+          zoomImg.style.transform = turned;
+          zoomImg.style.opacity = '0.1';
+        } else {
+          inc.classList.add('zflip');
+          inc.style.transform = atRest;
+          inc.style.opacity = '1';
+        }
+        setTimeout(finish, 560);
+      });});
+    };
+    inc.onerror = function(){ clearTimeout(fallback); finish(); };
+    function finish(){
+      if (!zAnim) return;
+      if (inc.parentNode){
+        zoomImg.remove();
+        inc.classList.remove('zflip');
+        inc.id = 'zoomImg';
+        zoomImg = inc;
+      } else {
+        zoomImg.src = inc.src;               /* fallback path: plain swap */
+      }
+      zoomPage = p;
+      zoomInfo.textContent = p + ' / ' + TOTAL;
+      zAnim = false;
+      zoomFit();
+    }
+    inc.src = pageFile(p);
   }
   document.getElementById('btnZoom').addEventListener('click', function(){ if (edition) openZoom(visiblePage()); });
   document.getElementById('zoomCloseBtn').addEventListener('click', closeZoom);
@@ -810,9 +933,11 @@
   var zPointers = new Map();
   var pinch0 = null;
   zoomer.addEventListener('pointerdown', function(e){
+    if (zAnim) return;
     if (e.target.closest && e.target.closest('#zoomBar')) return;
     if (zoomer.setPointerCapture){ try { zoomer.setPointerCapture(e.pointerId); } catch(err){} }
     zPointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    zSwipeX = (zPointers.size === 1) ? e.clientX : null;
     if (zPointers.size === 2){
       var pts = Array.from(zPointers.values());
       pinch0 = {
@@ -823,6 +948,7 @@
     }
   });
   zoomer.addEventListener('pointermove', function(e){
+    if (zAnim) return;
     var p = zPointers.get(e.pointerId);
     if (!p) return;
     var px = p.x, py = p.y;
@@ -849,6 +975,7 @@
   zoomer.addEventListener('pointercancel', zEnd);
 
   function zoomToggleAt(x, y){
+    if (zAnim) return;
     zoomImg.style.transition = 'transform .28s ease';
     setTimeout(function(){ zoomImg.style.transition = ''; }, 300);
     if (zs > 1.05){ zoomFit(); return; }
@@ -857,9 +984,19 @@
     zty = y - (y - zty) * (ns / zs);
     zs = ns; zoomClamp(); zoomRender();
   }
-  var zLastTap = 0, zLastX = 0, zLastY = 0;
+  var zLastTap = 0, zLastX = 0, zLastY = 0, zSwipeX = null;
   zoomer.addEventListener('pointerup', function(e){
     if (e.target.closest && e.target.closest('#zoomBar')) return;
+    /* at fit scale a horizontal swipe turns the page (zoomed-in swipes pan instead) */
+    if (zSwipeX !== null && zs <= 1.05 && !zAnim){
+      var sdx = e.clientX - zSwipeX;
+      if (Math.abs(sdx) > 55){
+        zSwipeX = null; zLastTap = 0;
+        zoomStep(sdx < 0 ? 1 : -1);
+        return;
+      }
+    }
+    zSwipeX = null;
     var now = Date.now();
     if (now - zLastTap < 320 && Math.hypot(e.clientX-zLastX, e.clientY-zLastY) < 30){
       zoomToggleAt(e.clientX, e.clientY);
@@ -868,6 +1005,7 @@
   });
   zoomer.addEventListener('wheel', function(e){
     e.preventDefault();
+    if (zAnim) return;
     var ns = Math.max(1, Math.min(6, zs * (e.deltaY < 0 ? 1.15 : 0.87)));
     ztx = e.clientX - (e.clientX - ztx) * (ns / zs);
     zty = e.clientY - (e.clientY - zty) * (ns / zs);
