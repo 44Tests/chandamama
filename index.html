@@ -378,7 +378,7 @@
 
   <section id="filters">
     <div id="decades"></div>
-    <input id="search" type="search" placeholder="సంవత్సరం లేదా నెల వెతకండి… (eg. 2012)">
+    <input id="search" type="search" placeholder="సంవత్సరం లేదా నెల… (డిసెంబర్, dec, 2012)">
   </section>
 
   <section id="stall">
@@ -450,6 +450,10 @@
   "use strict";
   var MONTHS_TE = ['జనవరి','ఫిబ్రవరి','మార్చి','ఏప్రిల్','మే','జూన్',
                    'జులై','ఆగస్టు','సెప్టెంబర్','అక్టోబర్','నవంబర్','డిసెంబర్'];
+  var MONTHS_TE_ALT = ['','','','','','జూన్','జూలై','ఆగష్టు','సెప్టెంబరు','అక్టోబరు','నవంబరు','డిసెంబరు'];
+  var MONTHS_EN = ['january','february','march','april','may','june',
+                   'july','august','september','october','november','december'];
+  function norm(s){ return (typeof ''.normalize === 'function') ? s.normalize('NFC') : s; }
   var editions = [], baseUrl = '';
   var filterDecade = null, filterText = '';
   var doneSet = {};
@@ -553,7 +557,9 @@
   function matches(ed){
     if (filterDecade !== null && Math.floor(ed.year/10)*10 !== filterDecade) return false;
     if (filterText){
-      var hay = (ed.title + ' ' + ed.year + ' ' + ed.id + ' ' + MONTHS_TE[(ed.month||1)-1]).toLowerCase();
+      var m = (ed.month || 1) - 1;
+      var hay = norm((ed.title + ' ' + ed.year + ' ' + ed.id + ' ' +
+        MONTHS_TE[m] + ' ' + MONTHS_TE_ALT[m] + ' ' + MONTHS_EN[m]).toLowerCase());
       if (hay.indexOf(filterText) === -1) return false;
     }
     return true;
@@ -619,7 +625,7 @@
       btn.classList.add('on');
     }
     document.getElementById('search').addEventListener('input', function(){
-      filterText = this.value.trim().toLowerCase();
+      filterText = norm(this.value.trim().toLowerCase());
       render();
     });
   }
