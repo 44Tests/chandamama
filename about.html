@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>గురించి · చందమామ</title>
+<meta name="description" content="Why this site exists, who owns what, and how it was made.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+<meta name="theme-color" content="#17131f">
+<style>
+  :root {
+    --tel: "Kohinoor Telugu", "Telugu MN", "Noto Sans Telugu", "Gautami", sans-serif;
+    --eng: Georgia, "Times New Roman", serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: var(--eng); color:#fff7e6; -webkit-tap-highlight-color: transparent;
+    background: linear-gradient(to bottom, #1d1b47 0%, #43305f 40%, #8a4f63 70%, #d67d4b 90%, #f0a95e 100%) fixed;
+    min-height:100%;
+  }
+  #stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .star { position:absolute; background:#fff; border-radius:50%; animation: twinkle 3s ease-in-out infinite; }
+  @keyframes twinkle { 0%,100%{opacity:.8} 50%{opacity:.2} }
+  #treeline { position:fixed; left:0; right:0; bottom:0; height:16vh; z-index:0;
+    background-repeat:repeat-x; background-size:auto 100%; opacity:.9; pointer-events:none; }
+
+  #wrap { position:relative; z-index:1; max-width:720px; margin:0 auto;
+    padding: calc(34px + env(safe-area-inset-top, 0px)) 22px 22vh; }
+  a { color:#ffd98f; }
+
+  header { text-align:center; margin-bottom:34px; }
+  header img { width:min(300px, 70vw); display:block; margin:0 auto; }
+  header .crumb { font-family:var(--tel); font-size:14px; margin-top:10px; }
+  header .crumb a { text-decoration:none; }
+
+  h2 { font-family:var(--tel); font-size:20px; color:#ffe9ad; margin: 40px 0 14px;
+    padding-bottom:8px; border-bottom:1px solid rgba(255,233,173,.25); letter-spacing:.5px; }
+  p { font-size:15px; line-height:1.85; margin-bottom:14px; color:rgba(255,247,230,.92); }
+  p.te { font-family:var(--tel); font-size:15.5px; }
+
+  .qa { background:rgba(20,16,30,.45); border:1px solid rgba(255,233,173,.18);
+    border-radius:12px; padding:16px 20px; margin-bottom:14px; }
+  .qa h3 { font-family:var(--tel); font-size:15.5px; color:#ffe9ad; margin-bottom:8px; }
+  .qa h3 em { font-family:var(--eng); font-size:12.5px; font-weight:400; font-style:italic;
+    color:rgba(255,240,215,.6); margin-left:6px; }
+  .qa p { font-size:14px; margin-bottom:8px; }
+  .qa p:last-child { margin-bottom:0; }
+  .qa p.te { font-size:14.5px; }
+
+  #backRow { text-align:center; margin-top:48px; }
+  #backRow a { display:inline-block; font-family:var(--tel); font-size:15px; text-decoration:none;
+    background:rgba(20,16,30,.55); border:1px solid rgba(255,233,173,.3); border-radius:26px;
+    padding:11px 26px; }
+  #backRow a:hover { background:rgba(20,16,30,.85); }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="treeline"></div>
+
+<div id="wrap">
+  <header>
+    <a href="./"><img src="assets/logo-header.webp" alt="చందమామ"></a>
+    <div class="crumb"><a href="./">🏪 బుక్ స్టాల్</a> · గురించి</div>
+  </header>
+
+  <h2>ఈ సైట్ ఎందుకు? · Why this exists</h2>
+  <p class="te">
+    నేను పెరిగింది నేటి తెలంగాణలో — అప్పట్లో అది ఉమ్మడి ఆంధ్రప్రదేశ్. దసరా, సంక్రాంతి,
+    వేసవి సెలవుల్లో అమ్మమ్మ వాళ్ళ ఊరికి బస్సు ప్రయాణాలే నా చిన్నతనపు జ్ఞాపకాలు.
+    బస్ స్టాండ్‌లో రెండు కొనేవాడిని: ఒక పాప్‌కార్న్ ప్యాకెట్, ఒక కొత్త చందమామ.
+    మిగతా ప్రయాణమంతా ఆ పుస్తకమే.
+  </p>
+  <p>
+    I grew up in what is now Telangana, when it was still undivided Andhra Pradesh.
+    My clearest childhood memories are bus journeys to my grandparents' village —
+    and at the bus stand, always the same two purchases: a packet of popcorn and the
+    latest Telugu <em>Chandamama</em>. The magazine made the rest of the journey disappear.
+    This site exists to keep that feeling, not just the pages: you pick an issue at the
+    stall, a ticket gets punched, and you read as the countryside rolls past the window,
+    one kilometre per page, until you reach అమ్మమ్మ ఊరు.
+  </p>
+
+  <h2>తరచూ అడిగే ప్రశ్నలు · FAQ</h2>
+
+  <div class="qa">
+    <h3>ఇది ఉచితమా? <em>Is this free?</em></h3>
+    <p class="te">పూర్తిగా. ప్రకటనలు లేవు, ఖాతాలు లేవు, ట్రాకింగ్ లేదు. ఎప్పటికీ ఉండవు.</p>
+    <p>Completely. No ads, no accounts, no tracking — and it will stay that way.
+    It costs you nothing and earns me nothing.</p>
+  </div>
+
+  <div class="qa">
+    <h3>చందమామ మీదా? <em>Do you own Chandamama?</em></h3>
+    <p>No. Not the name, the stories, the art, or the scans. I am just someone who loved
+    reading it on a bus. The only thing made here is the reading experience around the
+    pages — the stall, the ticket, the milestone. If you hold rights to Chandamama and
+    object to this site, <a href="https://github.com/44Tests/chandamama/issues">open an
+    issue</a> and it comes down immediately, no argument.</p>
+  </div>
+
+  <div class="qa">
+    <h3>స్కాన్‌లు ఎక్కడివి? <em>Where do the scans come from?</em></h3>
+    <p>Chandamama stopped printing in 2013, and scans of old issues have circulated
+    among readers ever since — the quiet preservation work of people who couldn't bear
+    to lose it. This site collects such scans and gives them a way to be read, not just
+    stored. Nothing is altered: pages appear exactly as scanned, ink smudges and all.</p>
+  </div>
+
+  <div class="qa">
+    <h3>ఫోన్‌లో యాప్ లాగా? <em>Can I use it like an app?</em></h3>
+    <p class="te">అవును. iPhone: Safari లో Share ⬆︎ → “Add to Home Screen”.
+    Android: Chrome ⋮ → “Add to Home screen”. తర్వాత చందమామ ఐకాన్ నుంచి తెరిస్తే
+    పూర్తి తెరపై, యాప్ లాగే ఉంటుంది.</p>
+    <p>Yes — add it to your home screen and it opens fullscreen like a native app,
+    with your reading position remembered per issue.</p>
+  </div>
+
+  <div class="qa">
+    <h3>పాత సంచికల్లో లోకం ఎందుకు మారుతుంది? <em>Why does the world change with old issues?</em></h3>
+    <p>The bus you board matches the year you travel to. A 1947 issue rides a slow,
+    rattling bus through sepia countryside behind a single-tone horn; a 1990 issue gets
+    the warm, slightly faded colors of that decade; a 2012 issue rides the bus as it is
+    today. Only the world outside the window changes — the magazine pages always show
+    their true colors.</p>
+  </div>
+
+  <div class="qa">
+    <h3>ఇంకా ఎన్ని సంచికలు వస్తాయి? <em>How many issues will come?</em></h3>
+    <p class="te">లక్ష్యం: 1947 నుంచి 2012 వరకు — 65 సంవత్సరాల చందమామ.
+    సంచికలు దొరికినప్పుడల్లా స్టాల్‌లో వేలాడతాయి.</p>
+    <p>The goal is the full Telugu run, 1947 to 2012. Issues are added in batches as
+    good scans are found; the stall grows a string at a time.</p>
+  </div>
+
+  <div class="qa">
+    <h3>తప్పు కనిపించిందా? <em>Found a bug, or have an idea?</em></h3>
+    <p>Tell me on <a href="https://github.com/44Tests/chandamama/issues">GitHub</a> —
+    a broken page, a feature idea, or an issue you'd love to see added next.</p>
+  </div>
+
+  <h2>ఎలా తయారైంది · How it's made</h2>
+  <p>
+    Everything here is handmade: the palm trees and electric poles are drawn in SVG,
+    the bus horn and engine rumble and page rustle are synthesized in the browser
+    (no recordings), the APSRTC ticket is CSS, and the whole site is plain HTML —
+    no frameworks, nothing tracking you. Pages are WebP images served from
+    <a href="https://vercel.com">Vercel</a>; the code lives on
+    <a href="https://github.com/44Tests/chandamama">GitHub</a>.
+  </p>
+  <p>
+    The site was designed and built in conversation with
+    <a href="https://claude.com">Claude</a>, Anthropic's AI — the bus stand, the
+    era-tinted journeys, the milestone counting down to అమ్మమ్మ ఊరు, all of it argued
+    into shape one memory at a time, in Telugu and English. The memories are mine;
+    much of the craft is Claude's; the magazine, forever, is Chandamama's.
+  </p>
+
+  <div id="backRow">
+    <a href="./">🏪 స్టాల్‌కి తిరిగి వెళ్ళండి</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var starsBox = document.getElementById('stars');
+  for (var st=0; st<40; st++){
+    var d = document.createElement('div');
+    d.className = 'star';
+    var sz = Math.random()*2+0.6;
+    d.style.width = d.style.height = sz+'px';
+    d.style.left = (Math.random()*100)+'%';
+    d.style.top = (Math.random()*45)+'%';
+    d.style.animationDelay = (Math.random()*3)+'s';
+    starsBox.appendChild(d);
+  }
+  function svgUrl(s){ return 'url("data:image/svg+xml,'+encodeURIComponent(s)+'")'; }
+  function palm(x, sc){
+    return '<g transform="translate('+x+',330) scale('+sc+')">'+
+      '<path d="M-6 0 L-3 -150 L3 -150 L6 0 Z"/>'+
+      '<g transform="translate(0,-150)">'+
+      '<path d="M0 0 Q-45 -18 -70 -2 Q-40 -26 0 -14 Z"/>'+
+      '<path d="M0 0 Q45 -18 70 -2 Q40 -26 0 -14 Z"/>'+
+      '<path d="M0 -6 Q-38 -42 -58 -40 Q-28 -52 0 -20 Z"/>'+
+      '<path d="M0 -6 Q38 -42 58 -40 Q28 -52 0 -20 Z"/>'+
+      '<path d="M-3 -10 Q-8 -55 -20 -62 Q0 -58 4 -18 Z"/>'+
+      '<path d="M3 -10 Q8 -55 20 -62 Q0 -58 -4 -18 Z"/>'+
+      '</g></g>';
+  }
+  var treesSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340">'+
+    '<g fill="%230d0a18">'+palm(90,1.0)+palm(310,0.75)+palm(560,1.1)+palm(820,0.85)+palm(1050,0.95)+
+    '<rect x="0" y="325" width="1200" height="15"/></g></svg>';
+  document.getElementById('treeline').style.backgroundImage = svgUrl(treesSvg);
+  var h = new Date().getHours();
+  if (h >= 21 || h < 5) document.body.style.background =
+    'linear-gradient(to bottom, #05070f 0%, #0c102e 42%, #22284e 72%, #3a3560 100%) fixed';
+})();
+</script>
+</body>
+</html>
