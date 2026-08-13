@@ -82,6 +82,31 @@
   #oncoming .hl:last-child { right:0; }
   .paused #oncoming { display:none; }
 
+  /* ---- eras: the world outside the window matches the edition's decade ---- */
+  /* vintage: pre-1960 — near-monochrome, slower, rattlier */
+  body.era-vintage #world { filter: sepia(.55) saturate(.5) contrast(1.06); }
+  body.era-vintage #hills { animation-duration: 130s; }
+  body.era-vintage #trees { animation-duration: 46s; }
+  body.era-vintage #poles { animation-duration: 21s; }
+  body.era-vintage #road  { animation-duration: 2.3s; opacity:.35; }
+  body.era-vintage #milestone .cap { background:#e8e2d2; border-color:#b8b2a2; }
+  body.era-vintage #milestone .stone { background:#f6f2e6; }
+  /* classic: 1960s–70s — faded film color */
+  body.era-classic #world { filter: sepia(.32) saturate(.7) contrast(1.03); }
+  body.era-classic #hills { animation-duration: 110s; }
+  body.era-classic #trees { animation-duration: 40s; }
+  body.era-classic #poles { animation-duration: 18s; }
+  body.era-classic #road  { animation-duration: 1.9s; }
+  /* retro: 1980s–90s — warm slightly-washed color */
+  body.era-retro #world { filter: sepia(.14) saturate(.88); }
+  /* modern (2000s+): as-is */
+  #eraYear { position:fixed; z-index:40; font-family:var(--eng);
+    top: calc(196px + env(safe-area-inset-top, 0px)); left:26px; width:128px; text-align:center;
+    color:rgba(255,240,215,.65); font-size:13px; letter-spacing:3px; font-style:italic; }
+  @media (max-width: 640px) {
+    #eraYear { width:86px; left:10px; top:calc(150px + env(safe-area-inset-top, 0px)); font-size:11px; }
+  }
+
   #frame { position:absolute; inset:0; pointer-events:none;
     box-shadow: inset 0 0 0 10px #17131f, inset 0 0 0 13px #2c2438, inset 0 0 120px rgba(0,0,0,.65);
   }
@@ -302,6 +327,7 @@
     <div class="km"><span id="kmVal">–</span> <small>కి.మీ</small></div>
   </div>
 </div>
+<div id="eraYear"></div>
 
 <div id="stage">
   <div id="bookBob"><div id="bookShift">
@@ -660,6 +686,29 @@
     starsBox.appendChild(d);
   }
 
+  /* ---------- eras: how old is the bus you boarded? ---------- */
+  var ERA = { name:'modern', lp:95, hum:46, lfoRate:0.35, lfoDepth:3.5, horn:[438,552], hornLen:1.0 };
+  var ERAS = {
+    vintage: { name:'vintage', lp:72,  hum:39, lfoRate:0.6,  lfoDepth:7.5, horn:[365],     hornLen:1.35 },
+    classic: { name:'classic', lp:82,  hum:43, lfoRate:0.45, lfoDepth:5.5, horn:[398,502], hornLen:1.15 },
+    retro:   { name:'retro',   lp:90,  hum:45, lfoRate:0.4,  lfoDepth:4.5, horn:[425,540], hornLen:1.05 },
+    modern:  { name:'modern',  lp:95,  hum:46, lfoRate:0.35, lfoDepth:3.5, horn:[438,552], hornLen:1.0  }
+  };
+  function eraFor(year){
+    if (year < 1960) return 'vintage';
+    if (year < 1980) return 'classic';
+    if (year < 2000) return 'retro';
+    return 'modern';
+  }
+  function applyEra(year){
+    var key = params.get('era');                 /* ?era=vintage lets you preview any era */
+    if (!key || !ERAS[key]) key = eraFor(year);
+    ERA = ERAS[key];
+    document.body.classList.remove('era-vintage','era-classic','era-retro');
+    if (key !== 'modern') document.body.classList.add('era-' + key);
+    document.getElementById('eraYear').textContent = '· ' + year + ' ·';
+  }
+
   /* ---------- audio (all synthesized) ---------- */
   var AC = null, masterGain = null, rumbleGain = null;
   function initAudio(){
@@ -676,14 +725,14 @@
         data[i] = last * 3.2;
       }
       var src = AC.createBufferSource(); src.buffer = buf; src.loop = true;
-      var lp = AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 95; lp.Q.value = 0.6;
+      var lp = AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = ERA.lp; lp.Q.value = 0.6;
       rumbleGain = AC.createGain(); rumbleGain.gain.value = 0;
       src.connect(lp); lp.connect(rumbleGain); rumbleGain.connect(masterGain);
       src.start();
-      var osc = AC.createOscillator(); osc.type='sine'; osc.frequency.value = 46;
+      var osc = AC.createOscillator(); osc.type='sine'; osc.frequency.value = ERA.hum;
       var og = AC.createGain(); og.gain.value = 0.035;
-      var lfo = AC.createOscillator(); lfo.frequency.value = 0.35;
-      var lg = AC.createGain(); lg.gain.value = 3.5;
+      var lfo = AC.createOscillator(); lfo.frequency.value = ERA.lfoRate;
+      var lg = AC.createGain(); lg.gain.value = ERA.lfoDepth;
       lfo.connect(lg); lg.connect(osc.frequency);
       osc.connect(og); og.connect(rumbleGain);
       osc.start(); lfo.start();
@@ -696,20 +745,20 @@
   }
   function sfxHorn(){
     if (!AC || !soundOn) return;
-    var t = AC.currentTime;
-    [438, 552].forEach(function(f){
+    var t = AC.currentTime, L = ERA.hornLen;
+    ERA.horn.forEach(function(f){
       var o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f;
       var bp = AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value = f*1.6; bp.Q.value = 1.6;
       var g = AC.createGain();
       g.gain.setValueAtTime(0, t);
       g.gain.linearRampToValueAtTime(0.055, t+0.05);
-      g.gain.setValueAtTime(0.055, t+0.42);
-      g.gain.linearRampToValueAtTime(0, t+0.6);
-      g.gain.linearRampToValueAtTime(0.05, t+0.72);
-      g.gain.setValueAtTime(0.05, t+1.1);
-      g.gain.linearRampToValueAtTime(0, t+1.35);
+      g.gain.setValueAtTime(0.055, t+0.42*L);
+      g.gain.linearRampToValueAtTime(0, t+0.6*L);
+      g.gain.linearRampToValueAtTime(0.05, t+0.72*L);
+      g.gain.setValueAtTime(0.05, t+1.1*L);
+      g.gain.linearRampToValueAtTime(0, t+1.35*L);
       o.connect(bp); bp.connect(g); g.connect(masterGain);
-      o.start(t); o.stop(t+1.4);
+      o.start(t); o.stop(t+1.4*L);
     });
   }
   function sfxFlip(){
@@ -1261,6 +1310,7 @@
 
   /* ---------- boot ---------- */
   function init(){
+    applyEra(edition.year);
     document.getElementById('thumbsTitle').textContent = 'అన్ని పేజీలు · ' + edition.title;
     buildSheets();
     layout();
