@@ -2,6 +2,51 @@
   "baseUrl": "",
   "editions": [
     {
+      "id": "2012-07-te",
+      "lang": "te",
+      "year": 2012,
+      "month": 7,
+      "title": "జులై 2012",
+      "pages": 84,
+      "price": "₹ 25/-"
+    },
+    {
+      "id": "2012-08-te",
+      "lang": "te",
+      "year": 2012,
+      "month": 8,
+      "title": "ఆగస్టు 2012",
+      "pages": 84,
+      "price": "₹ 25/-"
+    },
+    {
+      "id": "2012-09-te",
+      "lang": "te",
+      "year": 2012,
+      "month": 9,
+      "title": "సెప్టెంబర్ 2012",
+      "pages": 84,
+      "price": "₹ 25/-"
+    },
+    {
+      "id": "2012-10-te",
+      "lang": "te",
+      "year": 2012,
+      "month": 10,
+      "title": "అక్టోబర్ 2012",
+      "pages": 84,
+      "price": "₹ 25/-"
+    },
+    {
+      "id": "2012-11-te",
+      "lang": "te",
+      "year": 2012,
+      "month": 11,
+      "title": "నవంబర్ 2012",
+      "pages": 84,
+      "price": "₹ 25/-"
+    },
+    {
       "id": "2012-12-te",
       "lang": "te",
       "year": 2012,
