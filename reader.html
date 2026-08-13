@@ -620,11 +620,23 @@
   function save(){
     try {
       var p = visiblePage();
-      localStorage.setItem('cm-' + edition.id, String(p));
       var recent = [];
       try { recent = JSON.parse(localStorage.getItem('cm-recent') || '[]'); } catch(e){}
       recent = recent.filter(function(r){ return r.id !== edition.id; });
-      recent.unshift({ id: edition.id, page: p, when: Date.now() });
+      if (p >= TOTAL){
+        /* arrived: off the reading shelf, into the done drawer, fresh start next time */
+        localStorage.setItem('cm-' + edition.id, '1');
+        var done = [];
+        try { done = JSON.parse(localStorage.getItem('cm-done') || '[]'); } catch(e){}
+        if (!done.some(function(d){ return d.id === edition.id; })){
+          done.unshift({ id: edition.id, when: Date.now() });
+          localStorage.setItem('cm-done', JSON.stringify(done.slice(0, 1000)));
+          toast('సంచిక పూర్తయింది ✓');
+        }
+      } else {
+        localStorage.setItem('cm-' + edition.id, String(p));
+        recent.unshift({ id: edition.id, page: p, when: Date.now() });
+      }
       localStorage.setItem('cm-recent', JSON.stringify(recent.slice(0, 12)));
     } catch(e){}
   }
