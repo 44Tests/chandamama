@@ -44,6 +44,26 @@ if [[ $n -eq 0 ]]; then echo "no pages rendered" >&2; exit 1; fi
 
 first="$TMP/$(ls "$TMP" | sort | head -1)"
 cwebp -quiet -q 80 -resize 480 0 "$first" -o "$ED/cover.webp"
+sips -Z 640 -s format jpeg "$first" --out "$ED/share.jpg" >/dev/null
+
+echo "→ writing share card ..."
+mkdir -p "$ROOT/share"
+cat > "$ROOT/share/$ID.html" <<SHARE
+<!DOCTYPE html><html lang="te"><head><meta charset="UTF-8">
+<title>$TITLE · చందమామ</title>
+<meta property="og:title" content="$TITLE · చందమామ">
+<meta property="og:description" content="చిన్నప్పటి బస్సు ప్రయాణంలా చదవండి — one kilometre per page.">
+<meta property="og:image" content="https://www.chandamama.co/editions/$ID/share.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:url" content="https://www.chandamama.co/share/$ID">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta http-equiv="refresh" content="0;url=/reader.html?e=$ID">
+</head><body style="background:#0b1026;color:#ffe9ad;font-family:sans-serif;text-align:center;padding-top:30vh">
+<script>location.replace('/reader.html?e=$ID');</script>
+<a href="/reader.html?e=$ID" style="color:#ffe9ad">$TITLE · చందమామ</a>
+</body></html>
+SHARE
 
 echo "→ updating manifest ..."
 PAGES=$n ID="$ID" TITLE="$TITLE" PRICE="$PRICE" ROOT="$ROOT" python3 - <<'PY'

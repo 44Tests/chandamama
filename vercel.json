@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/share/:id", "destination": "/share/:id.html" }
+  ],
   "headers": [
     {
       "source": "/editions/(.*)",

@@ -275,6 +275,15 @@
     transition: transform .5s cubic-bezier(.2,.9,.3,1.2); box-shadow:0 8px 24px rgba(0,0,0,.5); }
   #toast.show { transform:translateX(-50%) translateY(0); }
 
+  /* vestibular safety: calm decorative motion, keep functional feedback quick */
+  @media (prefers-reduced-motion: reduce) {
+    .scroller, #road, .star, #bookBob, #oncoming, #moon { animation: none !important; }
+    #milestone.bump { transform: none; }
+    .sheet { transition-duration: 300ms; }
+    .zpage.zflip { transition-duration: 250ms; }
+    #bookShift { transition-duration: 250ms; }
+  }
+
   /* narrow mode: shade the sliver of the neighbouring page at the screen edges */
   body.narrow #stage::before, body.narrow #stage::after {
     content:""; position:absolute; top:0; bottom:0;
@@ -346,6 +355,7 @@
   <div id="pageInfo">…</div>
   <button id="btnNext" title="→"><span class="txt">ముందుకు </span><span class="ico">›</span></button>
   <button id="btnZoom" title="పెద్దది చేయండి"><span class="ico">🔍</span></button>
+  <button id="btnShare" title="పంచుకోండి"><span class="ico">📤</span></button>
   <button id="btnThumbs" title="అన్ని పేజీలు"><span class="ico">☰</span><span class="txt"> పేజీలు</span></button>
   <button id="btnSound" title="శబ్దం"><span class="ico">🔊</span><span class="txt"> ప్రయాణం</span></button>
   <button id="btnFull" title="పూర్తి తెర"><span class="ico">⛶</span></button>
@@ -1323,6 +1333,17 @@
     document.body.classList.toggle('paused', !soundOn);
     if (soundOn){ initAudio(); if (AC && AC.state==='suspended') AC.resume(); rumbleTo(0.12); }
     else rumbleTo(0);
+  });
+  document.getElementById('btnShare').addEventListener('click', function(){
+    if (!edition) return;
+    var url = location.origin + '/share/' + edition.id;
+    if (navigator.share){
+      navigator.share({ title: edition.title + ' · చందమామ', url: url }).catch(function(){});
+    } else if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url)
+        .then(function(){ toast('లింక్ కాపీ అయింది 📋'); })
+        .catch(function(){ toast(url); });
+    }
   });
   document.getElementById('btnFull').addEventListener('click', function(){
     if (document.fullscreenElement) document.exitFullscreen();
