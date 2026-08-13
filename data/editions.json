@@ -2,6 +2,56 @@
   "baseUrl": "",
   "editions": [
     {
+      "id": "1947-10-te",
+      "lang": "te",
+      "year": 1947,
+      "month": 10,
+      "title": "అక్టోబర్ 1947",
+      "pages": 64,
+      "price": "6 అణాలు"
+    },
+    {
+      "id": "1947-11-te",
+      "lang": "te",
+      "year": 1947,
+      "month": 11,
+      "title": "నవంబర్ 1947",
+      "pages": 72,
+      "price": "6 అణాలు"
+    },
+    {
+      "id": "1960-02-te",
+      "lang": "te",
+      "year": 1960,
+      "month": 2,
+      "title": "ఫిబ్రవరి 1960",
+      "pages": 90
+    },
+    {
+      "id": "1960-03-te",
+      "lang": "te",
+      "year": 1960,
+      "month": 3,
+      "title": "మార్చి 1960",
+      "pages": 76
+    },
+    {
+      "id": "1990-03-te",
+      "lang": "te",
+      "year": 1990,
+      "month": 3,
+      "title": "మార్చి 1990",
+      "pages": 68
+    },
+    {
+      "id": "1990-07-te",
+      "lang": "te",
+      "year": 1990,
+      "month": 7,
+      "title": "జులై 1990",
+      "pages": 68
+    },
+    {
       "id": "2012-07-te",
       "lang": "te",
       "year": 2012,

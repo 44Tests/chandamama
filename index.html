@@ -508,7 +508,9 @@
     boarding = true;
     currentEd = ed;
     document.getElementById('twhich').textContent = edLabel(ed) + ' సంచిక';
-    document.getElementById('tfare').textContent = ed.price || 'రూ. 2–50';
+    var fareEl = document.getElementById('tfare');
+    fareEl.textContent = ed.price || '';
+    fareEl.style.display = ed.price ? '' : 'none';
     document.getElementById('tkm').textContent = ed.pages + ' పేజీలు · ' + ed.pages + ' కి.మీ';
     var mm = (ed.month < 10 ? '0' : '') + ed.month;
     document.getElementById('tserial').textContent = 'D ' + ed.year + mm;
