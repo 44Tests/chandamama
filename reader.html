@@ -482,15 +482,15 @@
   function layout(){
     var barEl = document.getElementById('bar');
     var barH = (barEl && barEl.offsetHeight) || 56;
-    var availH = window.innerHeight - barH - 40;
-    var availW = window.innerWidth - 40;
+    var availH = window.innerHeight - barH - 24;
+    var availW = window.innerWidth - 24;
     narrow = (availW < availH * AR * 1.7);
     var ph, pw;
     if (!narrow){
-      ph = Math.min(availH * 0.92, (availW * 0.84 / 2) / AR);
+      ph = Math.min(availH * 0.97, (availW * 0.92 / 2) / AR);
       pw = ph * AR;
     } else {
-      ph = Math.min(availH * 0.88, (availW * 0.92) / AR);
+      ph = Math.min(availH * 0.93, (availW * 0.96) / AR);
       pw = ph * AR;
     }
     document.documentElement.style.setProperty('--pw', pw+'px');
@@ -924,6 +924,9 @@
   }
   function openZoom(p){
     zoomPage = Math.max(1, Math.min(TOTAL, p));
+    zoomImg.classList.remove('zflip');       /* clear any leftover flip state */
+    zoomImg.style.opacity = '1';
+    zoomImg.style.transformOrigin = '';
     zoomImg.src = pageFile(zoomPage);
     zoomInfo.textContent = zoomPage + ' / ' + TOTAL;
     zoomer.classList.add('open');
@@ -952,8 +955,10 @@
     inc.style.transformOrigin = 'left center';
     inc.style.transform = (d > 0) ? atRest : turned;
     if (d < 0) inc.style.opacity = '0.1';
-    var fallback = setTimeout(finish, 1200); /* never strand the view on a slow page */
+    var alive = true, finished = false;
+    var fallback = setTimeout(function(){ alive = false; finish(); }, 1200); /* slow page: plain swap */
     inc.onload = function(){
+      if (!alive) return;                    /* fallback already took over — do not corrupt the view */
       clearTimeout(fallback);
       if (d > 0) zoomer.insertBefore(inc, zoomImg);      /* new page waits beneath */
       else zoomer.insertBefore(inc, zoomImg.nextSibling); /* new page flips in on top */
@@ -972,9 +977,10 @@
         setTimeout(finish, 560);
       });});
     };
-    inc.onerror = function(){ clearTimeout(fallback); finish(); };
+    inc.onerror = function(){ if (!alive) return; clearTimeout(fallback); finish(); };
     function finish(){
-      if (!zAnim) return;
+      if (finished) return;
+      finished = true;
       if (inc.parentNode){
         zoomImg.remove();
         inc.classList.remove('zflip');
@@ -983,6 +989,9 @@
       } else {
         zoomImg.src = inc.src;               /* fallback path: plain swap */
       }
+      zoomImg.style.opacity = '1';
+      zoomImg.style.transformOrigin = '';
+      zoomImg.classList.remove('zflip');
       zoomPage = p;
       zoomInfo.textContent = p + ' / ' + TOTAL;
       zAnim = false;
